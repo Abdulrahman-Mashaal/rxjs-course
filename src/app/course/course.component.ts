@@ -53,7 +53,7 @@ this.course$ = createHttpObservable(`/api/courses/${this.courseId}`)
             startWith(''), // initial value
             debounceTime(400), // wait 400ms after the last keyup event before emitting the value
             distinctUntilChanged(), // only emit if the value is different from the previous one
-            switchMap(searchTerm => this.loadLessons(searchTerm))
+            switchMap(searchTerm => this.loadLessons(searchTerm)) // switch to new observable
     );
 }
 
