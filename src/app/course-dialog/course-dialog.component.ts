@@ -39,11 +39,25 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-
-
-
+        // valueChanges emits when any form control changes and emits the current value of the form.
+        this.form.valueChanges.pipe(
+            filter(() => this.form.valid),
+            concatMap(changes => this.saveCourse(changes)) // waiting for one observable to complete before moving to the next one
+        ).subscribe()
     }
 
+    saveCourse(changes: Course){
+        // formPromise is an Observable that emits the result of the fetch request.
+        return fromPromise(
+            fetch(`/api/courses/${this.course.id}`, {
+                method: 'PUT',
+                body: JSON.stringify(changes),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+        )
+    }
 
 
     ngAfterViewInit() {
