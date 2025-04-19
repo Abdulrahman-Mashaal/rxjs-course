@@ -26,8 +26,21 @@ export class HomeComponent implements OnInit {
     const http$: Observable<Course[]> = createHttpObservable("/api/courses");
     const courses$: Observable<Course[]> = http$.pipe(
       tap(() => console.log('HTTP request executed')), // using for debugging purposes
-      map((res) => Object.values(res["payload"] as Course[])),
-      shareReplay() // using to cache the response and avoid multiple requests
+      map((res) => Object.values(res['payload'] as Course[])),
+      shareReplay(), // using to cache the response and avoid multiple requests
+      // alternative error response 
+      // fetches data form an offline database when the network is down
+      catchError(err => of([
+        {
+          id: 0,
+        description: "RxJs In Practice Course",
+        iconUrl: 'https://s3-us-west-1.amazonaws.com/angular-university/course-images/rxjs-in-practice-course.png',
+        courseListIcon: 'https://angular-academy.s3.amazonaws.com/main-logo/main-page-logo-small-hat.png',
+        longDescription: "Understand the RxJs Observable pattern, learn the RxJs Operators via practical examples",
+        category: 'BEGINNER',
+        lessonsCount: 10
+        }
+      ]))
     );
     // Observable definition
     this.beginnerCourses$ = courses$.pipe(
