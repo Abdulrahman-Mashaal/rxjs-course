@@ -47,15 +47,14 @@ this.course$ = createHttpObservable(`/api/courses/${this.courseId}`)
 
     ngAfterViewInit() {
 
-    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+        this.lessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
         .pipe(
             map((event: any) => event.target.value),
+            startWith(''), // initial value
             debounceTime(400), // wait 400ms after the last keyup event before emitting the value
             distinctUntilChanged(), // only emit if the value is different from the previous one
             switchMap(searchTerm => this.loadLessons(searchTerm))
-        );
-        const initialLessons$ = this.loadLessons() // initial lessons
-        this.lessons$ = concat(initialLessons$, searchLessons$) // concat the initial lessons with the search results
+    );
 }
 
     private loadLessons(search:string='') : Observable<Lesson[]> {
