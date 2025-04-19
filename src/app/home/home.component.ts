@@ -10,6 +10,7 @@ import {
   retryWhen,
   shareReplay,
   tap,
+  delay,
 } from "rxjs/operators";
 import { createHttpObservable } from "../common/util";
 
@@ -26,16 +27,13 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
     const http$: Observable<Course[]> = createHttpObservable("/api/courses");
     const courses$: Observable<Course[]> = http$.pipe(
-      catchError(err => {
-        console.log('Error occurred', err);
-        return throwError(err); // using throwError to throw the error to the next operator
-      }),
-      finalize(() => {
-        console.log('Finalize executed...')
-      }),
       tap(() => console.log('HTTP request executed')), // using for debugging purposes
       map((res) => Object.values(res['payload'] as Course[])),
       shareReplay(), // using to cache the response and avoid multiple requests
+      // retryWhen operator is used to retry the request after a delay
+      retryWhen(errors => errors.pipe(
+        delayWhen(() => timer(2000))
+      ))
     );
     // Observable definition
     this.beginnerCourses$ = courses$.pipe(
