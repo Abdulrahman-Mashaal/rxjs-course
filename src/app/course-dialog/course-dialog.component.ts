@@ -21,7 +21,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('saveButton', { static: true }) saveButton: ElementRef;
 
     @ViewChild('searchInput', { static: true }) searchInput : ElementRef;
-
+     
     constructor(
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
@@ -59,19 +59,21 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
         )
     }
 
-
+    // FIXME: Is not working well
     ngAfterViewInit() {
-
-
+        // Check if the element exists before setting up the event listener
+        if (this.saveButton.nativeElement) {
+            fromEvent(this.saveButton.nativeElement, 'click')
+                .pipe(
+                    exhaustMap(() => this.saveCourse(this.form.value)) // ignore all events until the previous one is completed
+                )
+                .subscribe();
+        }
     }
-
-
 
     close() {
         this.dialogRef.close();
     }
 
-  save() {
-
-  }
+  
 }
