@@ -26,7 +26,7 @@ import { createHttpObservable } from '../common/util';
 })
 export class CourseComponent implements OnInit, AfterViewInit {
 
-
+    courseId: string;
     course$: Observable<Course>;
     lessons$: Observable<Lesson[]>;
 
@@ -39,22 +39,29 @@ export class CourseComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-const courseId = this.route.snapshot.params['id'];
-this.course$ = createHttpObservable(`/api/courses/${courseId}`)
-this.lessons$ = createHttpObservable(`/api/lessons?courseId=${courseId}&pageSize=100`).pipe(
-    map(res => res['payload'])
-)
+this.courseId = this.route.snapshot.params['id'];
+this.course$ = createHttpObservable(`/api/courses/${this.courseId}`)
+;
 
     }
 
     ngAfterViewInit() {
 
+    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+        .pipe(
+            map((event: any) => event.target.value),
+            debounceTime(400), // wait 400ms after the last keyup event before emitting the value
+            distinctUntilChanged(), // only emit if the value is different from the previous one
+            switchMap(searchTerm => this.loadLessons(searchTerm))
+        );
+        const initialLessons$ = this.loadLessons() // initial lessons
+        this.lessons$ = concat(initialLessons$, searchLessons$) // concat the initial lessons with the search results
+}
 
-
-
+    private loadLessons(search:string='') : Observable<Lesson[]> {
+        return createHttpObservable(`/api/lessons?courseId=${this.courseId}&pageSize=100&filter=${search}`).pipe(
+            map(res => res['payload'])
+            )
     }
-
-
-
 
 }
